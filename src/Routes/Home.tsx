@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import {makeImagePath} from '../utils';
 import {useState} from 'react';
 import {motion, AnimatePresence, Variants} from 'framer-motion';
+import {useHistory, useRouteMatch} from 'react-router-dom';
 
 const Wrapper = styled.div`
     background: black;
@@ -107,6 +108,7 @@ const infoVars:Variants = {
 function Home(){
     const {data, isLoading} = useQuery<IGetMoviesResult>(['movies', 'nowPlaying'], getMovies);
     console.log(data, isLoading);
+    const bigMovieMatch = useRouteMatch<{movieId:string}>('/movies/:movieId');
     const [index, setIndex] = useState(0);
     const [leaving, setLeaving] = useState(false);
     const toggleLeaving = () => setLeaving(prev => !prev);
@@ -120,6 +122,10 @@ function Home(){
         }
     };
     const offset = 6;
+    const history = useHistory();
+    const onBoxClicked = (movieId:number) => {
+        history.push(`/movies/${movieId}`); // 해당 경로로 이동
+    }
     return (
         <Wrapper>
             {isLoading? <Loader>Loading...</Loader> : 
@@ -138,18 +144,38 @@ function Home(){
                                 transition={{type: "tween", duration: 1}}
                             >
                                 {data?.results.slice(1).slice(offset*index, offset*index+offset).map(movie => 
-                                    <Box key={movie.id} 
+                                    <Box key={movie.id}
+                                        layoutId={movie.id + ""} 
                                         variants={boxVars} 
                                         initial="normal" 
                                         whileHover="hover" // Info에도 상속되기 때문에 따로 설정 안해줘도 됨
                                         transition={{type: "tween"}}
-                                        bgPhoto={makeImagePath(movie.backdrop_path, "w500")}>
-                                            <Info variants={infoVars}>{movie.title}</Info>
+                                        bgPhoto={makeImagePath(movie.backdrop_path, "w500")}
+                                        onClick={() => onBoxClicked(movie.id)} // 파라미터가 있는 함수를 넣으려면 화살표함수로 감싸야 함
+                                    >
+                                        <Info variants={infoVars}>{movie.title}</Info>
                                     </Box>
                                 )}
                             </Row>
                         </AnimatePresence>
                     </Slider>
+                    <AnimatePresence>
+                        { bigMovieMatch ? (
+                            <motion.div
+                                layoutId={bigMovieMatch.params.movieId}
+                                style={{
+                                    position: "absolute",
+                                    width: "40vw",
+                                    height: "80vh",
+                                    backgroundColor: "red",
+                                    top: 50,
+                                    left: 0,
+                                    right: 0,
+                                    margin: "0 auto",
+                                }}
+                            ></motion.div>
+                        ) : null}
+                    </AnimatePresence>
                 </>
             }
         </Wrapper>
