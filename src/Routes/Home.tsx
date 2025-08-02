@@ -57,6 +57,16 @@ const Box = styled(motion.div)<{bgPhoto:string}>`
         transform-origin: center right;
     } // 맨 왼쪽과 맨 오른쪽에 있는 box는 상하좌우로 커지지 않고 왼쪽/오른쪽으로만 커지게
 `;
+const Info = styled(motion.div)`
+    padding: 10px;
+    background-color: ${(props) => props.theme.black.lighter};
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    color: white;
+    text-align: center;
+    opacity: 0;
+`;
 
 const rowVars:Variants = {
     hidden: {
@@ -80,7 +90,17 @@ const boxVars:Variants = {
             type: "tween",
             delay: 0.3, // 마우스를 올릴 때만 딜레이가 있고 내릴 때는 딜레이가 없도록 hover시에만 설정
         },
-        y: -50,
+        y: -80,
+    }
+}
+
+const infoVars:Variants = {
+    hover: {
+        opacity: 1,
+        transition: {
+            type: "tween",
+            delay: 0.3,
+        },
     }
 }
 
@@ -121,9 +141,10 @@ function Home(){
                                     <Box key={movie.id} 
                                         variants={boxVars} 
                                         initial="normal" 
-                                        whileHover="hover"
+                                        whileHover="hover" // Info에도 상속되기 때문에 따로 설정 안해줘도 됨
                                         transition={{type: "tween"}}
                                         bgPhoto={makeImagePath(movie.backdrop_path, "w500")}>
+                                            <Info variants={infoVars}>{movie.title}</Info>
                                     </Box>
                                 )}
                             </Row>
