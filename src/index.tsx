@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { createGlobalStyle, ThemeProvider } from "styled-components";
 import {theme} from './theme';
+import {QueryClient, QueryClientProvider} from 'react-query';
 
 const GlobalStyle = createGlobalStyle`
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap');
@@ -61,6 +62,7 @@ body {
   font-family: 'Source Sans Pro', sans-serif;
   color:black;
   line-height: 1.2;
+  background-color: black;
 }
 a {
   text-decoration:none;
@@ -71,12 +73,15 @@ a {
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+const client = new QueryClient();
 
 root.render(
   <React.StrictMode>
-    <GlobalStyle />
-    <ThemeProvider theme={theme}>
-        <App />
-    </ThemeProvider>
+    <QueryClientProvider client={client}>
+      <GlobalStyle />
+      <ThemeProvider theme={theme}>
+          <App />
+      </ThemeProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );

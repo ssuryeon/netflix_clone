@@ -1,9 +1,9 @@
 import styled from 'styled-components';
-import {motion} from 'framer-motion';
+import {motion, useAnimation, useViewportScroll} from 'framer-motion';
 import {Link, useRouteMatch} from 'react-router-dom';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 
-const Nav = styled.nav`
+const Nav = styled(motion.nav)`
     background-color: black;
     display: flex;
     justify-content: space-between;
@@ -68,7 +68,14 @@ const Search = styled.span`
 const Input = styled(motion.input)`
     transform-origin: right center;
     position: absolute;
-    left: -150px;
+    right: 0px;
+    padding: 5px 10px;
+    padding-left: 40px;
+    z-index: -1;
+    color: white;
+    font-size: 16px;
+    background-color: transparent;
+    border: 1px solid ${(props) => props.theme.white.lighter};
 `;
 
 const logoVars = {
@@ -83,14 +90,48 @@ const logoVars = {
     },
 }
 
+const navVars = {
+    top: {
+        backgroundColor: 'rgba(0,0,0,0)',
+    },
+    scroll: {
+        backgroundColor: 'rgba(0,0,0,1)',
+    }
+}
+
 function Header(){
     const homeMatch = useRouteMatch('/'); // 경로가 / 일때 homeMatch 객체만 생성
     const tvMatch = useRouteMatch('/tv'); // 경로가 /tv일때 / 도 /tv의 일부이기 때문에 homeMatch, tvMatch 둘다 생성
     // 생성만 이렇게 되고 매칭여부는 똑바로 나옴
     const [searchOpen, setSearchOpen] = useState(false); // open 여부에 따라 리렌더링되어야 하므로 state 이용
-    const toggleSearch = () => setSearchOpen(prev => !prev);
+    const inputAnimation = useAnimation();
+    const navAnimation = useAnimation();
+    const toggleSearch = () => {
+        if(searchOpen){
+            inputAnimation.start({
+                scaleX: 0,
+            })
+        }
+        else {
+            inputAnimation.start({
+                scaleX: 1,
+            })
+        }
+        setSearchOpen(prev => !prev)
+    };
+    const {scrollY} = useViewportScroll();
+    useEffect(() => {
+        scrollY.onChange(() => {
+            if(scrollY.get() > 80){
+                navAnimation.start('scroll');
+            }
+            else {
+                navAnimation.start('top');
+            }
+        })
+    }, [scrollY, navAnimation])
     return (
-        <Nav>
+        <Nav variants={navVars} animate={navAnimation} initial={'top'}>
             <Col>
             <Logo
                 xmlns="http://www.w3.org/2000/svg"
@@ -112,7 +153,7 @@ function Header(){
                 <Search>
                     <motion.svg
                         onClick={toggleSearch}
-                        animate={{x: searchOpen? -180 : 0}}
+                        animate={{x: searchOpen? -215 : 0}}
                         transition={{ease: "linear"}}
                         fill="currentColor"
                         viewBox="0 0 20 20"
@@ -126,7 +167,8 @@ function Header(){
                     </motion.svg>
                     <Input
                         transition={{ease: "linear"}} // 안 튕기게
-                        animate={{scaleX: searchOpen? 1 : 0}} 
+                        animate={inputAnimation}
+                        initial={{scaleX: 0}} 
                         placeholder="Search for movie or tv show..."
                     />
                 </Search>
